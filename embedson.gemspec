@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["szymon.fracczak@netguru.co"]
   spec.summary       = %q{Embedded model for AR with postgresql}
   spec.description   = %q{Save any class which respond to to_h in json column as embedded model.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/sufleR/embedson"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
