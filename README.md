@@ -2,9 +2,7 @@
 
 Adds functionality of `embedded_one` and `embedded_in`. 
 
-Embeded class is saved in json column.
-
-Embedded class have to provide `to_h` method which should return data to store in database.
+Embeded class is saved in json column and has to provide `to_h` method which should return `Hash` to store in database.
 
 ####TODO
 
