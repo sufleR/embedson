@@ -66,7 +66,7 @@ Example with [Virtus](https://github.com/solnic/virtus):
 	test.save
 	test.attributes # => {"id"=>1, "data"=>{"name"=>"Sample", "address"=>{"street"=>"Kind", "number"=>"33"}
 	
-	test.reload.virt.attributes # =>  {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}, :children=>[]}
+	test.reload.virt.attributes # =>  {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}}
 	test.virt == virt # => true
 	test.virt.parent == test # => true
 	
