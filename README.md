@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/sufleR/embedson/badges/gpa.svg)](https://codeclimate.com/github/sufleR/embedson)
+
 # Embedson
 
 Adds functionality of `embedded_one` and `embedded_in`. 
