@@ -59,11 +59,11 @@ Example with [Virtus](https://github.com/solnic/virtus):
 	virt.attributes # => {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}}
 	
 	test = Test.create!
-	test.attributes # => {"id"=>1, "data"=>nil
+	test.attributes # => {"id"=>1, "data"=>nil}
 	
 	test.virt = virt
 	test.save
-	test.attributes # => {"id"=>1, "data"=>{"name"=>"Sample", "address"=>{"street"=>"Kind", "number"=>"33"}
+	test.attributes # => {"id"=>1, "data"=>{"name"=>"Sample", "address"=>{"street"=>"Kind", "number"=>"33"}}
 	
 	test.reload.virt.attributes # =>  {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}}
 	test.virt == virt # => true
