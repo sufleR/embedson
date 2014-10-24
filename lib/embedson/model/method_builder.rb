@@ -12,102 +12,14 @@ module Embedson
       end
 
       def embeds
-        klass.class_exec field_name, related_klass_name, column_name, inverse_get, inverse_set, &embeds_writer
-        klass.class_exec field_name, related_klass_name, column_name, inverse_set, &embeds_reader
+        methods_embeds.each do |meth|
+          klass.class_exec self, &send(meth)
+        end
       end
 
       def embedded
-        klass.class_exec field_name, &embedded_reader
-        klass.class_exec field_name, related_klass_name, column_name, inverse_get, inverse_set, &embedded_writer
-        klass.class_exec field_name, &embedded_save
-        klass.class_exec field_name, inverse_set, &embedded_destroy
-        klass.class_exec field_name, inverse_set, &embedded_changed
-      end
-
-      private
-
-      def embeds_writer
-        lambda do |field_name, related_klass_name, column_name, inverse_get, inverse_set|
-          define_method("#{field_name}=") do |arg|
-            raise ClassTypeError.new(arg.class.name, related_klass_name) unless arg.nil? || arg.is_a?(related_klass_name.constantize)
-
-            if arg.respond_to?(inverse_set) && arg.public_send(inverse_get) != self
-              arg.public_send(inverse_set, self)
-            end
-
-            instance_variable_set("@#{field_name}", arg)
-            write_attribute(column_name, arg.nil? ? arg : arg.to_h)
-          end
-        end
-      end
-
-      def embeds_reader
-        lambda do |field_name, related_klass_name, column_name, inverse_set|
-          define_method(field_name) do
-            return if read_attribute(column_name).nil?
-
-            if instance_variable_get("@#{field_name}").nil?
-              model = related_klass_name.constantize.new(read_attribute(column_name))
-              instance_variable_set("@#{field_name}", model)
-              model.public_send(inverse_set, self) if model.respond_to?(inverse_set)
-            end
-            instance_variable_get("@#{field_name}")
-          end
-        end
-      end
-
-      def embedded_reader
-        lambda do |field_name|
-          define_method(field_name) do
-            instance_variable_get("@#{field_name}")
-          end
-        end
-      end
-
-      def embedded_writer
-        lambda do |field_name, related_klass_name, column_name, inverse_get, inverse_set|
-          define_method("#{field_name}=") do |arg|
-            raise ClassTypeError.new(arg.class.name, related_klass_name) unless arg.nil? || arg.is_a?(related_klass_name.constantize)
-
-            instance_variable_set("@#{field_name}", arg)
-            parent = public_send(field_name)
-
-            if parent.respond_to?(inverse_set) && parent.public_send(inverse_get) != self
-              parent.public_send(inverse_set, self)
-            end
-          end
-        end
-      end
-
-      def embedded_destroy
-        lambda do |field_name, inverse_set|
-          define_method('destroy') do
-            parent = public_send(field_name)
-            return false unless parent.present?
-            parent.public_send(inverse_set, nil)
-            parent.save!
-          end
-        end
-      end
-
-      def embedded_save
-        lambda do |field_name|
-          define_method('save') do
-            parent = public_send(field_name)
-            return false unless parent.present?
-            parent.save
-          end
-        end
-      end
-
-      def embedded_changed
-        lambda do |field_name, inverse_set|
-          define_method('embedson_model_changed!') do
-            parent = public_send(field_name)
-            raise "No parent model defined!" unless parent.present?
-            parent.public_send(inverse_set, self)
-            true
-          end
+        methods_embedded.each do |meth|
+          klass.class_exec self, &send(meth)
         end
       end
 
@@ -126,7 +38,101 @@ module Embedson
       def inverse_set
         "#{inverse_get}="
       end
-    end
 
+      private
+
+      def methods_embedded
+        self.class.private_instance_methods(false).select{ |m| m.to_s.start_with?('embedded_') }
+      end
+
+      def methods_embeds
+        self.class.private_instance_methods(false).select{ |m| m.to_s.start_with?('embeds_') }
+      end
+
+      def embeds_writer
+        proc do |builder|
+          define_method("#{builder.field_name}=") do |arg|
+            raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
+
+            if arg.respond_to?(builder.inverse_set) && arg.public_send(builder.inverse_get) != self
+              arg.public_send(builder.inverse_set, self)
+            end
+
+            instance_variable_set("@#{builder.field_name}", arg)
+            write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
+          end
+        end
+      end
+
+      def embeds_reader
+        proc do |builder|
+          define_method(builder.field_name) do
+            return if read_attribute(builder.column_name).nil?
+
+            if instance_variable_get("@#{builder.field_name}").nil?
+              model = builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
+              instance_variable_set("@#{builder.field_name}", model)
+              model.public_send(builder.inverse_set, self) if model.respond_to?(builder.inverse_set)
+            end
+            instance_variable_get("@#{builder.field_name}")
+          end
+        end
+      end
+
+      def embedded_reader
+        proc do |builder|
+          define_method(builder.field_name) do
+            instance_variable_get("@#{builder.field_name}")
+          end
+        end
+      end
+
+      def embedded_writer
+        proc do |builder|
+          define_method("#{builder.field_name}=") do |arg|
+            raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
+
+            instance_variable_set("@#{builder.field_name}", arg)
+            parent = public_send(builder.field_name)
+
+            if parent.respond_to?(builder.inverse_set) && parent.public_send(builder.inverse_get) != self
+              parent.public_send(builder.inverse_set, self)
+            end
+          end
+        end
+      end
+
+      def embedded_destroy
+        proc do |builder|
+          define_method('destroy') do
+            parent = public_send(builder.field_name)
+            return false unless parent.present?
+            parent.public_send(builder.inverse_set, nil)
+            parent.save!
+          end
+        end
+      end
+
+      def embedded_save
+        proc do |builder|
+          define_method('save') do
+            parent = public_send(builder.field_name)
+            return false unless parent.present?
+            parent.save
+          end
+        end
+      end
+
+      def embedded_changed
+        proc do |builder|
+          define_method('embedson_model_changed!') do
+            parent = public_send(builder.field_name)
+            raise "No parent model defined!" unless parent.present?
+            parent.public_send(builder.inverse_set, self)
+            true
+          end
+        end
+      end
+    end
   end
 end
