@@ -58,10 +58,10 @@ describe Embedson::Model do
         end
 
         context 'when assigning wrong class' do
-          it 'raises TypeError' do
+          it 'raises ClassTypeError' do
             expect{
               parent.embedded = 'something'
-            }.to raise_error(TypeError)
+            }.to raise_error(Embedson::ClassTypeError)
           end
         end
 

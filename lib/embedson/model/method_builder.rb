@@ -29,7 +29,7 @@ module Embedson
       def embeds_writer
         lambda do |field_name, related_klass_name, column_name, inverse_get, inverse_set|
           define_method("#{field_name}=") do |arg|
-            raise TypeError, "wrong argument type #{arg.class.name} (expected #{related_klass_name})" unless arg.nil? || arg.is_a?(related_klass_name.constantize)
+            raise ClassTypeError.new(arg.class.name, related_klass_name) unless arg.nil? || arg.is_a?(related_klass_name.constantize)
 
             if arg.respond_to?(inverse_set) && arg.public_send(inverse_get) != self
               arg.public_send(inverse_set, self)
@@ -67,7 +67,7 @@ module Embedson
       def embedded_writer
         lambda do |field_name, related_klass_name, column_name, inverse_get, inverse_set|
           define_method("#{field_name}=") do |arg|
-            raise TypeError, "wrong argument type #{arg.class.name} (expected #{related_klass_name})" unless arg.nil? || arg.is_a?(related_klass_name.constantize)
+            raise ClassTypeError.new(arg.class.name, related_klass_name) unless arg.nil? || arg.is_a?(related_klass_name.constantize)
 
             instance_variable_set("@#{field_name}", arg)
             parent = public_send(field_name)
