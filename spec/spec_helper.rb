@@ -14,9 +14,13 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  ActiveRecord::Base.establish_connection(
-    "postgres://embedson:embedson@localhost/embedson"
-  )
+  connection = if ENV['BUILDER'] == 'travis'
+                 "postgres://postgres@localhost/travis_ci_test"
+               else
+                 "postgres://embedson:embedson@localhost/embedson"
+               end
+
+  ActiveRecord::Base.establish_connection(connection)
 
   config.order = :random
   Kernel.srand config.seed
