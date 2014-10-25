@@ -50,22 +50,37 @@ module Embedson
       end
 
       def methods_embedded
-        methods_private.select{ |m| m.to_s.start_with?('embedded_') } + [:send_self_to_related]
+        methods_private.select{ |m| m.to_s.start_with?('embedded_') } + methods_for_both
       end
 
       def methods_embeds
-        methods_private.select{ |m| m.to_s.start_with?('embeds_') } + [:send_self_to_related]
+        methods_private.select{ |m| m.to_s.start_with?('embeds_') } + methods_for_both
+      end
+
+      def methods_for_both
+        [:send_self_to_related, :verify_arg_klass]
       end
 
       def embeds_writer
         proc do |builder|
           define_method("#{builder.field_name}=") do |arg|
-            raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
-
+            verify_arg_klass(arg)
             send_self_to_related(arg)
 
             instance_variable_set(builder.instance_var_name, arg)
             write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
+          end
+        end
+      end
+
+      def verify_arg_klass
+        proc do |builder|
+          private
+
+          define_method('verify_arg_klass') do |arg|
+            unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
+              raise ClassTypeError.new(arg.class.name, builder.related_klass_name)
+            end
           end
         end
       end
@@ -126,7 +141,7 @@ module Embedson
       def embedded_writer
         proc do |builder|
           define_method("#{builder.field_name}=") do |arg|
-            raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
+            verify_arg_klass(arg)
 
             instance_variable_set(builder.instance_var_name, arg)
             parent = public_send(builder.field_name)
