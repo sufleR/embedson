@@ -31,12 +31,16 @@ module Embedson
         @related_klass_name ||= (options.fetch(:class_name, nil) || field_name).to_s.classify
       end
 
+      def instance_var_name
+        @instance_var_name ||= "@#{field_name}"
+      end
+
       def inverse_get
         @inverse_get ||= options.fetch(:inverse_of, nil) || klass.name.demodulize.tableize.singularize
       end
 
       def inverse_set
-        "#{inverse_get}="
+        @inverse_set ||= "#{inverse_get}="
       end
 
       private
@@ -58,7 +62,7 @@ module Embedson
               arg.public_send(builder.inverse_set, self)
             end
 
-            instance_variable_set("@#{builder.field_name}", arg)
+            instance_variable_set(builder.instance_var_name, arg)
             write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
           end
         end
@@ -69,8 +73,18 @@ module Embedson
           define_method(builder.field_name) do
             return if read_attribute(builder.column_name).nil?
 
-            build_related_model if instance_variable_get("@#{builder.field_name}").nil?
-            instance_variable_get("@#{builder.field_name}")
+            build_related_model if instance_variable_get(builder.instance_var_name).nil?
+            instance_variable_get(builder.instance_var_name)
+          end
+        end
+      end
+
+      def embeds_related_model
+        proc do |builder|
+          private
+
+          define_method('related_model') do
+            builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
           end
         end
       end
@@ -78,10 +92,10 @@ module Embedson
       def embeds_build_related_model
         proc do |builder|
           private
+
           define_method('build_related_model') do
-            model = builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
-            instance_variable_set("@#{builder.field_name}", model)
-            model.public_send(builder.inverse_set, self) if model.respond_to?(builder.inverse_set)
+            instance_variable_set(builder.instance_var_name, related_model)
+            related_model.public_send(builder.inverse_set, self) if related_model.respond_to?(builder.inverse_set)
           end
         end
       end
@@ -89,7 +103,7 @@ module Embedson
       def embedded_reader
         proc do |builder|
           define_method(builder.field_name) do
-            instance_variable_get("@#{builder.field_name}")
+            instance_variable_get(builder.instance_var_name)
           end
         end
       end
@@ -99,7 +113,7 @@ module Embedson
           define_method("#{builder.field_name}=") do |arg|
             raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
 
-            instance_variable_set("@#{builder.field_name}", arg)
+            instance_variable_set(builder.instance_var_name, arg)
             parent = public_send(builder.field_name)
 
             if parent.respond_to?(builder.inverse_set) && parent.public_send(builder.inverse_get) != self
