@@ -45,12 +45,16 @@ module Embedson
 
       private
 
+      def methods_private
+        @methods_private ||= self.class.private_instance_methods(false)
+      end
+
       def methods_embedded
-        self.class.private_instance_methods(false).select{ |m| m.to_s.start_with?('embedded_') }
+        methods_private.select{ |m| m.to_s.start_with?('embedded_') } + [:send_self_to_related]
       end
 
       def methods_embeds
-        self.class.private_instance_methods(false).select{ |m| m.to_s.start_with?('embeds_') }
+        methods_private.select{ |m| m.to_s.start_with?('embeds_') } + [:send_self_to_related]
       end
 
       def embeds_writer
@@ -58,12 +62,23 @@ module Embedson
           define_method("#{builder.field_name}=") do |arg|
             raise ClassTypeError.new(arg.class.name, builder.related_klass_name) unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
 
+            send_self_to_related(arg)
+
+            instance_variable_set(builder.instance_var_name, arg)
+            write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
+          end
+        end
+      end
+
+      def send_self_to_related
+        proc do |builder|
+          private
+
+          define_method('send_self_to_related') do |arg|
             if arg.respond_to?(builder.inverse_set) && arg.public_send(builder.inverse_get) != self
               arg.public_send(builder.inverse_set, self)
             end
 
-            instance_variable_set(builder.instance_var_name, arg)
-            write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
           end
         end
       end
@@ -116,9 +131,7 @@ module Embedson
             instance_variable_set(builder.instance_var_name, arg)
             parent = public_send(builder.field_name)
 
-            if parent.respond_to?(builder.inverse_set) && parent.public_send(builder.inverse_get) != self
-              parent.public_send(builder.inverse_set, self)
-            end
+            send_self_to_related(parent)
           end
         end
       end
