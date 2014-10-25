@@ -69,12 +69,19 @@ module Embedson
           define_method(builder.field_name) do
             return if read_attribute(builder.column_name).nil?
 
-            if instance_variable_get("@#{builder.field_name}").nil?
-              model = builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
-              instance_variable_set("@#{builder.field_name}", model)
-              model.public_send(builder.inverse_set, self) if model.respond_to?(builder.inverse_set)
-            end
+            build_related_model if instance_variable_get("@#{builder.field_name}").nil?
             instance_variable_get("@#{builder.field_name}")
+          end
+        end
+      end
+
+      def embeds_build_related_model
+        proc do |builder|
+          private
+          define_method('build_related_model') do
+            model = builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
+            instance_variable_set("@#{builder.field_name}", model)
+            model.public_send(builder.inverse_set, self) if model.respond_to?(builder.inverse_set)
           end
         end
       end
