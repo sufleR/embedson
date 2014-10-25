@@ -1,5 +1,12 @@
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+if ENV['BUILDER'] == 'travis'
+  require "codeclimate-test-reporter"
+  CodeClimate::TestReporter.start
+else
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/spec/'
+  end
+end
 
 require 'embedson'
 require 'with_model'
