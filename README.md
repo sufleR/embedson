@@ -6,13 +6,12 @@
 
 # Embedson
 
-Adds functionality of `embedded_one` and `embedded_in`. 
+Adds functionality of `embeds_one` to ActiveRecord.
 
-Embeded class is saved in json column and has to provide `to_h` method which should return `Hash` to store in database.
+Adds `embedded_in` method to any class with defined `to_h` method which should return `Hash` and should be also initialized with it.
 
-####TODO
+Result of `to_h` is saved json/hstore column.
 
-1. Options and methods documentation
 
 ## Installation
 
@@ -34,18 +33,18 @@ Example with [Virtus](https://github.com/solnic/virtus):
 
 ```RUBY
 	
-	#create_tests.rb - migration	
+	#create_tests.rb - migration
 	class CreateTests < ActiveRecord::Migration
 	  def change
 	    create_table :tests do |t|
-		  t.json :data
-		end
+	      t.json :data
+	    end
 	  end
 	end
 	
 	class Test < ActiveRecord::Base
- 
-	  embeds_one :virt, column_name: :data, inverse_of: :parent
+
+	  embeds_one :virt, class_name: Virt, column_name: :data, inverse_of: :parent
 	end
 
 	class Virt
@@ -54,24 +53,77 @@ Example with [Virtus](https://github.com/solnic/virtus):
  
 	  attribute :name, String
 	  attribute :address, Hash
-	
-	  embedded_in :parent, class_name: Test
+
+	  embedded_in :parent, class_name: Test, inverse_of: :virt
 	end
-	
+
 	virt = Virt.new(name: 'Sample', address: { street: 'Kind', number: '33' })
 	virt.attributes # => {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}}
-	
+
 	test = Test.create!
 	test.attributes # => {"id"=>1, "data"=>nil}
-	
+
 	test.virt = virt
 	test.save
 	test.attributes # => {"id"=>1, "data"=>{"name"=>"Sample", "address"=>{"street"=>"Kind", "number"=>"33"}}
-	
+
 	test.reload.virt.attributes # =>  {:name=>"Sample", :address=>{:street=>"Kind", :number=>"33"}}
 	test.virt == virt # => true
 	test.virt.parent == test # => true
-	
+
+```
+
+You don't have to use all options to define ```embeds_one``` and ```embedded_in```. Just name it with downcased related class name.
+
+
+```RUBY
+	#create_tests.rb - migration
+	class CreateTests < ActiveRecord::Migration
+	  def change
+	    create_table :tests do |t|
+	      t.json :virt
+	    end
+	  end
+	end
+
+	class Test < ActiveRecord::Base
+ 
+	  embeds_one :virt
+	end
+
+	class Virt
+	  include Virtus.model
+	  extend Embedson::Model
+
+	  attribute :name, String
+	  attribute :address, Hash
+
+	  embedded_in :test
+	end
+```
+
+### Additional methods in embedded model:
+
+- ####save
+	Assigns embedded model ```to_h``` value to parent adn saves parent model with ```save!```.
+
+- ####save!
+	Assigns embedded model ```to_h``` value to parent and saves parent model with ```save!```.
+
+- ####destroy
+	Assigns ```nil``` to parent and saves parent with ```save!```
+
+- ####embedson_model_changed!
+	This gem does not provide dirty tracking of embedded model. To register change in parent model use this method in your setter.
+
+
+```RUBY
+
+        def your_variable=(arg)
+          @your_variable = arg
+          embedson_model_changed!
+        end
+
 ```
 
 
