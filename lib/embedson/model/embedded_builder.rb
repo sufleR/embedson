@@ -73,6 +73,16 @@ module Embedson
         end
       end
 
+      def embedded_save!
+        proc do |builder|
+          define_method('save!') do
+            parent = public_send(builder.field_name)
+            raise NoParentError.new('save', self.class.name) unless parent.present?
+            parent.save!
+          end
+        end
+      end
+
       def embedded_changed
         proc do |builder|
           define_method('embedson_model_changed!') do
