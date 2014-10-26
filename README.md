@@ -108,7 +108,7 @@ You don't have to use all options to define ```embeds_one``` and ```embedded_in`
 ### Additional methods in embedded model:
 
 - ####save
-	Assigns ```to_h``` result to parent and saves it with ```save!```.
+	Assigns ```to_h``` result to parent and saves it with ```save```.
 
 - ####save!
 	Assigns ```to_h``` result to parent and saves it with ```save!```.
