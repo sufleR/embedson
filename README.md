@@ -10,9 +10,7 @@ Embeded class is saved in json column and has to provide `to_h` method which sho
 
 ####TODO
 
-1. More tests
-2. Code refactoring to clean up `embedded_in` and `embeds_one` from define methods
-3. Options and methods documentation
+1. Options and methods documentation
 
 ## Installation
 
