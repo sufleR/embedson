@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/embedson.svg)](http://badge.fury.io/rb/embedson)
+[![Dependency Status](https://gemnasium.com/sufleR/embedson.svg)](https://gemnasium.com/sufleR/embedson)
 [![Code Climate](https://codeclimate.com/github/sufleR/embedson/badges/gpa.svg)](https://codeclimate.com/github/sufleR/embedson)
 [![Test Coverage](https://codeclimate.com/github/sufleR/embedson/badges/coverage.svg)](https://codeclimate.com/github/sufleR/embedson)
 [![Build Status](https://travis-ci.org/sufleR/embedson.svg?branch=master)](https://travis-ci.org/sufleR/embedson)
@@ -42,7 +44,6 @@ Example with [Virtus](https://github.com/solnic/virtus):
 	end
 	
 	class Test < ActiveRecord::Base
-	  extend Embedson::Model
  
 	  embeds_one :virt, column_name: :data, inverse_of: :parent
 	end
