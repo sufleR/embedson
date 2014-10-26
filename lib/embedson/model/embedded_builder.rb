@@ -66,7 +66,7 @@ module Embedson
         proc do |builder|
           define_method('embedson_model_changed!') do
             parent = public_send(builder.field_name)
-            raise "No parent model defined!" unless parent.present?
+            raise NoParentError.new('register change', self.class.name) unless parent.present?
             parent.public_send(builder.inverse_set, self)
             true
           end
