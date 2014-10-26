@@ -32,11 +32,11 @@ describe Embedson::Model do
       end
 
       it 'adds "embedded" method' do
-        expect(Parent.new()).to respond_to(:embedded)
+        expect(parent).to respond_to(:embedded)
       end
 
       it 'adds "embedded=" method' do
-        expect(Parent.new()).to respond_to("embedded=")
+        expect(parent).to respond_to("embedded=")
       end
 
       describe 'defined .embedded= method' do
@@ -77,7 +77,7 @@ describe Embedson::Model do
           end
 
           context 'and saved after change' do
-            it 'saves Embedded class to json column' do
+            it 'saves Embedded class in column' do
               expect{
                 parent.embedded = embedded
                 parent.save!
@@ -87,7 +87,7 @@ describe Embedson::Model do
         end
       end
 
-      describe 'defined embedded method' do
+      describe 'defined .embedded method' do
         context 'when value column is null' do
           it 'returns nil' do
             expect(parent.embedded).to be nil
