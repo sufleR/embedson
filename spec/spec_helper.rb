@@ -8,6 +8,7 @@ else
   end
 end
 
+require 'active_record'
 require 'embedson'
 require 'with_model'
 require 'pry'

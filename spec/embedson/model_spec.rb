@@ -11,8 +11,6 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :embedded
         end
       end
@@ -120,8 +118,6 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :embedded, column_name: :data
         end
       end
@@ -164,8 +160,6 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :embedded, inverse_of: :parent_m
         end
       end
@@ -209,8 +203,6 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :emb, class_name: 'Embedded', column_name: :embedded
         end
       end
@@ -255,8 +247,6 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :embedded
         end
       end
@@ -452,16 +442,12 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :emb, class_name: Embedded
         end
       end
 
       with_model :Embedded do
         model do
-          extend Embedson::Model
-
           embedded_in :parent, inverse_of: :emb
 
           def to_h
@@ -499,16 +485,12 @@ describe Embedson::Model do
         end
 
         model do
-          extend Embedson::Model
-
           embeds_one :embedded
         end
       end
 
       with_model :Embedded do
         model do
-          extend Embedson::Model
-
           embedded_in :parent, class_name: Parented
 
           def to_h
@@ -547,17 +529,10 @@ describe Embedson::Model do
         table do |t|
           t.json :embedded
         end
-
-        model do
-          extend Embedson::Model
-
-        end
       end
 
       with_model :Embedded do
         model do
-          extend Embedson::Model
-
           embedded_in :parent
 
           def to_h
