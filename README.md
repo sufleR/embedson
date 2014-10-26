@@ -50,7 +50,7 @@ Example with [Virtus](https://github.com/solnic/virtus):
 	class Virt
 	  include Virtus.model
 	  extend Embedson::Model
- 
+
 	  attribute :name, String
 	  attribute :address, Hash
 
@@ -87,7 +87,7 @@ You don't have to use all options to define ```embeds_one``` and ```embedded_in`
 	end
 
 	class Test < ActiveRecord::Base
- 
+
 	  embeds_one :virt
 	end
 
@@ -119,10 +119,10 @@ You don't have to use all options to define ```embeds_one``` and ```embedded_in`
 
 ```RUBY
 
-        def your_variable=(arg)
-          @your_variable = arg
-          embedson_model_changed!
-        end
+	def your_variable=(arg)
+	  @your_variable = arg
+	  embedson_model_changed!
+	end
 
 ```
 
