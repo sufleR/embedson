@@ -13,16 +13,12 @@ module Embedson
 
       def embeds
         EmbedsBuilder.new(self).define
-        methods_for_both.each do |meth|
-          klass.class_exec self, &send(meth)
-        end
+        generate_common
       end
 
       def embedded
         EmbeddedBuilder.new(self).define
-        methods_for_both.each do |meth|
-          klass.class_exec self, &send(meth)
-        end
+        generate_common
       end
 
       def column_name
@@ -46,6 +42,12 @@ module Embedson
       end
 
       private
+
+      def generate_common
+        methods_for_both.each do |meth|
+          klass.class_exec self, &send(meth)
+        end
+      end
 
       def methods_for_both
         [:send_self_to_related, :verify_arg_klass]
@@ -71,7 +73,6 @@ module Embedson
             if arg.respond_to?(builder.inverse_set) && arg.public_send(builder.inverse_get) != self
               arg.public_send(builder.inverse_set, self)
             end
-
           end
         end
       end
