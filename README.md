@@ -8,7 +8,10 @@
 
 Adds functionality of `embeds_one` to ActiveRecord.
 
-Adds functionality of `embedded_in` to any class with defined `to_h` method which should return `Hash` and should be also initialized with it.
+Adds functionality of `embedded_in` to any class:
+
+- with defined `to_h` method which should return `Hash` 
+- initialized with Hash.
 
 Result of `to_h` is saved json/hstore column.
 
