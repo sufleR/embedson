@@ -20,6 +20,17 @@ module Embedson
         self.class.private_instance_methods(false).select{ |m| m.to_s.start_with?('embedded_') }
       end
 
+      def embedded_initializer
+        proc do |builder|
+          define_method("initialize") do |*args|
+            attrs = args[0]
+            attrs ||= {}
+            public_send("#{builder.field_name}=", attrs.fetch(builder.field_name, nil))
+            super(*args)
+          end
+        end
+      end
+
       def embedded_writer
         proc do |builder|
           define_method("#{builder.field_name}=") do |arg|
