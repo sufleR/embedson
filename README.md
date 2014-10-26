@@ -105,13 +105,13 @@ You don't have to use all options to define ```embeds_one``` and ```embedded_in`
 ### Additional methods in embedded model:
 
 - ####save
-	Assigns embedded model ```to_h``` value to parent adn saves parent model with ```save!```.
+	Assigns ```to_h``` result to parent and saves it with ```save!```.
 
 - ####save!
-	Assigns embedded model ```to_h``` value to parent and saves parent model with ```save!```.
+	Assigns ```to_h``` result to parent and saves it with ```save!```.
 
 - ####destroy
-	Assigns ```nil``` to parent and saves parent with ```save!```
+	Assigns ```nil``` to parent and saves it with ```save!```
 
 - ####embedson_model_changed!
 	This gem does not provide dirty tracking of embedded model. To register change in parent model use this method in your setter.
