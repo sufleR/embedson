@@ -1,4 +1,4 @@
-Copyright (c) 2014 sufleR
+Copyright (c) 2014 Szymon Frącczak
 
 MIT License
 

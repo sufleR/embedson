@@ -184,3 +184,6 @@ This will **not** work!
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
+## License
+
+Copyright (c) 2014 Szymon Frącczak. See LICENSE.txt for further details.
