@@ -129,6 +129,51 @@ You don't have to use all options to define ```embeds_one``` and ```embedded_in`
 
 ```
 
+## Known issues
+
+- Placing ```initialize``` method after ```embedded_in``` and using ```Emb.new(parent: parent)```
+This examples will work:
+
+```RUBY
+	class Emb
+	  extend Embedson::Model
+	  
+          def initialize(attributes = {})
+	    # do your work here
+	  end
+
+	  embedded_in :parent
+	end
+``` 
+
+```RUBY
+	class Emb
+	  extend Embedson::Model
+
+	  embedded_in :parent
+        
+	  def initialize(attributes = {})
+	    self.parent = attributes[:parent]
+	    # do your work here
+	  end
+	end
+``` 
+
+This will **not** work!
+
+```RUBY
+	class Emb
+	  extend Embedson::Model
+	  embedded_in :parent
+	  
+          def initialize(attributes = {})
+	    # if you forget about assigning parent
+	    # do your work here
+	  end
+	end
+
+```
+
 
 ## Contributing
 

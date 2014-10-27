@@ -432,6 +432,40 @@ describe Embedson::Model do
           end
         end
       end
+
+      describe 'defined .initialize method' do
+
+
+        class Embeddedf
+          extend Embedson::Model
+
+          attr_reader :one, :two
+
+          def initialize(attributes = {})
+            @one = attributes[:one]
+            @two = attributes[:two]
+          end
+
+          # when you put it before initialize
+          # Embeddedf.new(parent: parent)
+          # will not owkr
+          embedded_in :parent
+
+          def to_h
+            { one: one, two: two }
+          end
+        end
+
+        let(:embedded) { Embeddedf.new(one: '1', two: '2', parent: parent)}
+
+        it 'allows to initialize with parent' do
+          expect(embedded.parent).to eq parent
+        end
+
+        it 'keeps initialize working' do
+          expect(embedded.to_h).to eq({ one: '1', two: '2' })
+        end
+      end
     end
 
     context 'when options include inverse_of' do

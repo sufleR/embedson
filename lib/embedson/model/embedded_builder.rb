@@ -22,11 +22,13 @@ module Embedson
 
       def embedded_initializer
         proc do |builder|
+          alias_method :orig_initialize, :initialize
+
           define_method("initialize") do |*args|
             attrs = args[0]
             attrs ||= {}
             public_send("#{builder.field_name}=", attrs.fetch(builder.field_name, nil))
-            super(*args)
+            orig_initialize(*args)
           end
         end
       end
