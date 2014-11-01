@@ -70,6 +70,7 @@ module Embedson
           define_method('save') do
             parent = public_send(builder.field_name)
             return false unless parent.present?
+            parent.public_send(builder.inverse_set, self)
             parent.save
           end
         end
@@ -80,6 +81,7 @@ module Embedson
           define_method('save!') do
             parent = public_send(builder.field_name)
             raise NoParentError.new('save', self.class.name) unless parent.present?
+            parent.public_send(builder.inverse_set, self)
             parent.save!
           end
         end
