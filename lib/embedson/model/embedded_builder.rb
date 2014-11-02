@@ -25,9 +25,10 @@ module Embedson
           alias_method :orig_initialize, :initialize
 
           define_method("initialize") do |*args|
-            attrs = args[0]
-            attrs ||= {}
-            public_send("#{builder.field_name}=", attrs.fetch(builder.field_name, nil))
+            attrs = args[0] || {}
+            val = attrs.fetch(builder.field_name, nil)
+
+            public_send("#{builder.field_name}=", val) if val.present?
             orig_initialize(*args)
           end
         end
