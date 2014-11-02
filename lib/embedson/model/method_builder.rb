@@ -26,7 +26,7 @@ module Embedson
       end
 
       def related_klass_name
-        @related_klass_name ||= (options.fetch(:class_name, nil) || field_name).to_s.classify
+        @related_klass_name ||= (options.fetch(:class_name, nil) || field_name).to_s.camelize
       end
 
       def instance_var_name
