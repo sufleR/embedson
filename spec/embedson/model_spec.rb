@@ -211,7 +211,7 @@ describe Embedson::Model do
       class Embeddedd < OpenStruct
         extend Embedson::Model
 
-        embedded_in :parent
+        embedded_in :parent, inverse_of: :emb
 
         def to_h
           { defined: 'in', embedded: true }
@@ -461,6 +461,16 @@ describe Embedson::Model do
 
       describe 'defined .initialize method' do
 
+        with_model :Parenta do
+          table do |t|
+            t.json :emb
+          end
+
+          model do
+            embeds_one :emb, class_name: Embeddedf
+          end
+        end
+
 
         class Embeddedf
           extend Embedson::Model
@@ -474,18 +484,19 @@ describe Embedson::Model do
 
           # when you put it before initialize
           # Embeddedf.new(parent: parent)
-          # will not owkr
-          embedded_in :parent
+          # will not work
+          embedded_in :parenta, inverse_of: :emb
 
           def to_h
             { one: one, two: two }
           end
         end
 
-        let(:embedded) { Embeddedf.new(one: '1', two: '2', parent: parent)}
+        let(:parent) { Parenta.new }
+        let(:embedded) { Embeddedf.new(one: '1', two: '2', parenta: parent)}
 
         it 'allows to initialize with parent' do
-          expect(embedded.parent).to eq parent
+          expect(embedded.parenta).to eq parent
         end
 
         it 'keeps initialize working' do
