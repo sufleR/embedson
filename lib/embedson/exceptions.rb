@@ -8,7 +8,7 @@ module Embedson
     end
 
     def build_message
-      "wrong argument type #{wrong_name} (expected #{correct_name})"
+      "Wrong argument type #{wrong_name} (expected #{correct_name})"
     end
   end
 
