@@ -40,9 +40,8 @@ module Embedson
             verify_arg_klass(arg)
 
             instance_variable_set(builder.instance_var_name, arg)
-            parent = public_send(builder.field_name)
 
-            send_self_to_related(parent)
+            send_to_related(self)
           end
         end
       end
@@ -60,7 +59,7 @@ module Embedson
           define_method('destroy') do
             parent = public_send(builder.field_name)
             return false unless parent.present?
-            parent.public_send(builder.inverse_set, nil)
+            send_to_related(nil)
             parent.save!
           end
         end
@@ -71,7 +70,7 @@ module Embedson
           define_method('save') do
             parent = public_send(builder.field_name)
             return false unless parent.present?
-            parent.public_send(builder.inverse_set, self)
+            send_to_related(self)
             parent.save
           end
         end
@@ -82,7 +81,7 @@ module Embedson
           define_method('save!') do
             parent = public_send(builder.field_name)
             raise NoParentError.new('save', self.class.name) unless parent.present?
-            parent.public_send(builder.inverse_set, self)
+            send_to_related(self)
             parent.save!
           end
         end
@@ -93,8 +92,21 @@ module Embedson
           define_method('embedson_model_changed!') do
             parent = public_send(builder.field_name)
             raise NoParentError.new('register change', self.class.name) unless parent.present?
-            parent.public_send(builder.inverse_set, self)
+            send_to_related(self)
             true
+          end
+        end
+      end
+
+      def embedded_send_to_related
+        proc do |builder|
+          private
+
+          define_method('send_to_related') do |arg|
+            parent = public_send(builder.field_name)
+            return if parent.nil?
+            raise NoRelationDefinedError.new(parent.class, builder.inverse_set) unless parent.respond_to?(builder.inverse_set)
+            parent.public_send(builder.inverse_set, arg)
           end
         end
       end

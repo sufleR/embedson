@@ -17,7 +17,7 @@ module Embedson
       private
 
       def methods_embeds
-        [:writer, :reader, :related_model, :build_related_model]
+        [:writer, :reader, :related_model, :build_related_model, :send_self_to_related]
       end
 
       def writer
@@ -27,7 +27,10 @@ module Embedson
             send_self_to_related(arg)
 
             instance_variable_set(builder.instance_var_name, arg)
-            write_attribute(builder.column_name, arg.nil? ? arg : arg.to_h)
+            val = arg.nil? ? arg : arg.to_h
+            unless val == read_attribute(builder.column_name)
+              write_attribute(builder.column_name, val)
+            end
           end
         end
       end
@@ -59,7 +62,21 @@ module Embedson
 
           define_method('build_related_model') do
             instance_variable_set(builder.instance_var_name, related_model)
-            related_model.public_send(builder.inverse_set, self) if related_model.respond_to?(builder.inverse_set)
+            if related_model.respond_to?(builder.inverse_set)
+              related_model.public_send(builder.inverse_set, self)
+            end
+          end
+        end
+      end
+
+      def send_self_to_related
+        proc do |builder|
+          private
+
+          define_method('send_self_to_related') do |arg|
+            if arg.respond_to?(builder.inverse_set) && arg.public_send(builder.inverse_get) != self
+              arg.public_send(builder.inverse_set, self)
+            end
           end
         end
       end

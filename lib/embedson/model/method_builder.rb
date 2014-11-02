@@ -50,7 +50,7 @@ module Embedson
       end
 
       def methods_for_both
-        [:send_self_to_related, :verify_arg_klass]
+        [:verify_arg_klass]
       end
 
       def verify_arg_klass
@@ -60,18 +60,6 @@ module Embedson
           define_method('verify_arg_klass') do |arg|
             unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
               raise ClassTypeError.new(arg.class.name, builder.related_klass_name)
-            end
-          end
-        end
-      end
-
-      def send_self_to_related
-        proc do |builder|
-          private
-
-          define_method('send_self_to_related') do |arg|
-            if arg.respond_to?(builder.inverse_set) && arg.public_send(builder.inverse_get) != self
-              arg.public_send(builder.inverse_set, self)
             end
           end
         end
