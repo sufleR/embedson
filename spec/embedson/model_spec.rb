@@ -7,15 +7,21 @@ describe Embedson::Model do
 
       with_model :Parent do
         table do |t|
-          t.json :embeddeda
+          t.json :embedded
+          t.json :emba
         end
 
         model do
-          embeds_one :embeddeda
+          embeds_one :embedded
+          embeds_one :emba, class_name: Embedded, inverse_of: :parenta
         end
       end
 
-      class Embeddeda
+      class Embedded < OpenStruct
+        extend Embedson::Model
+
+        embedded_in :parent
+        embedded_in :parenta, inverse_of: :emba
 
         def to_h
           { defined: 'in', embedded: true }
@@ -23,43 +29,43 @@ describe Embedson::Model do
       end
 
       let(:parent) { Parent.new }
-      let(:embedded) { Embeddeda.new }
+      let(:embedded) { Embedded.new }
 
       it 'adds "embeds_one" method' do
         expect(Parent).to respond_to(:embeds_one)
       end
 
-      it 'adds "embeddeda" method' do
-        expect(parent).to respond_to(:embeddeda)
+      it 'adds "embedded" method' do
+        expect(parent).to respond_to(:embedded)
       end
 
-      it 'adds "embeddeda=" method' do
-        expect(parent).to respond_to("embeddeda=")
+      it 'adds "embedded=" method' do
+        expect(parent).to respond_to("embedded=")
       end
 
-      describe 'defined .embeddeda= method' do
-        it 'assigns value of Embeddeda class' do
+      describe 'defined .embedded= method' do
+        it 'assigns value of Embedded class' do
 
           expect {
-            parent.embeddeda = embedded
-          }.to change{ parent.embeddeda }.from(nil).to(embedded)
+            parent.embedded = embedded
+          }.to change{ parent.embedded }.from(nil).to(embedded)
         end
 
         context 'when assigning nil' do
-          let(:parent) { Parent.new(embeddeda: embedded) }
+          let(:parent) { Parent.new(embedded: embedded) }
 
           it 'removes assignmnent' do
             parent
             expect {
-              parent.embeddeda = nil
-            }.to change { parent.embeddeda }.from(embedded).to(nil)
+              parent.embedded = nil
+            }.to change { parent.embedded }.from(embedded).to(nil)
           end
         end
 
         context 'when assigning wrong class' do
           it 'raises ClassTypeError' do
             expect{
-              parent.embeddeda = 'something'
+              parent.embedded = 'something'
             }.to raise_error(Embedson::ClassTypeError)
           end
         end
@@ -71,16 +77,16 @@ describe Embedson::Model do
 
           it 'marks parent as changed' do
             expect {
-              parent.embeddeda = embedded
+              parent.embedded = embedded
             }.to change{ parent.changed? }.from(false).to(true)
           end
 
           context 'and saved after change' do
-            it 'saves Embeddeda class in column' do
+            it 'saves Embedded class in column' do
               expect{
-                parent.embeddeda = embedded
+                parent.embedded = embedded
                 parent.save!
-              }.to change { parent.reload.read_attribute(:embeddeda) }.from(nil).to(embedded.to_h.stringify_keys)
+              }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to(embedded.to_h.stringify_keys)
             end
           end
         end
@@ -89,23 +95,23 @@ describe Embedson::Model do
       describe 'defined .embedded method' do
         context 'when value column is null' do
           it 'returns nil' do
-            expect(parent.embeddeda).to be nil
+            expect(parent.embedded).to be nil
           end
         end
 
-        it 'returns Embeddeda class' do
-          parent.embeddeda = embedded
-          expect(parent.embeddeda).to be_a Embeddeda
+        it 'returns Embedded class' do
+          parent.embedded = embedded
+          expect(parent.embedded).to be_a Embedded
         end
 
         context 'when there is defined value in column' do
           before do
-            parent.embeddeda = embedded
+            parent.embedded = embedded
             parent.save!
           end
 
           it 'returns Embeddeda class initialized with value from column' do
-            expect(parent.reload.embeddeda).to eq embedded
+            expect(parent.reload.embedded).to eq embedded
           end
         end
       end
@@ -282,6 +288,10 @@ describe Embedson::Model do
 
       it 'adds "parent=" method' do
         expect(embedded).to respond_to("parent=")
+      end
+
+      it 'adds "parent_send_to_related" method' do
+        expect(embedded.respond_to?("parent_send_to_related", true) ).to be true
       end
 
       describe 'defined .parent= method' do

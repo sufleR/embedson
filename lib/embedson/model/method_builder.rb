@@ -57,7 +57,7 @@ module Embedson
         proc do |builder|
           private
 
-          define_method('verify_arg_klass') do |arg|
+          define_method("#{builder.field_name}_verify_arg_klass") do |arg|
             unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
               raise ClassTypeError.new(arg.class.name, builder.related_klass_name)
             end
