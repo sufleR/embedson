@@ -14,8 +14,20 @@ describe Embedson::Model::EmbeddedBuilder do
     end
   end
 
-  class Son < OpenStruct
+  class Son
     extend Embedson::Model
+
+    def initialize(hash = nil)
+      @table = {}
+      return unless hash
+      hash.each do |k,v|
+        @table[k.to_sym] = v
+      end
+    end
+
+    def to_h
+      @table
+    end
 
     embedded_in :parent
     embedded_in :parenta, class_name: 'Parent', inverse_of: :emb
@@ -170,7 +182,6 @@ describe Embedson::Model::EmbeddedBuilder do
           expect(parent.son).to eq son
           expect(parent.emb).to eq son
         end
-
       end
 
       context 'and parent is persisted' do
