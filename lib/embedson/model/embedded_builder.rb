@@ -60,6 +60,14 @@ module Embedson
         end
       end
 
+      def embedded_alter_destroy
+        proc do |builder|
+          if self.instance_methods(false).include?(:destroy)
+            alias_method "#{builder.field_name}_destroy".to_sym, :destroy
+          end
+        end
+      end
+
       def embedded_destroy
         proc do |builder|
           define_method('destroy') do
@@ -68,6 +76,9 @@ module Embedson
 
             send("#{builder.field_name}_send_to_related", nil)
             parent.save!
+            if respond_to?("#{builder.field_name}_destroy")
+              send("#{builder.field_name}_destroy")
+            end
           end
         end
       end
@@ -95,14 +106,25 @@ module Embedson
         end
       end
 
+      def embedded_alter_save!
+        proc do |builder|
+          if self.instance_methods(false).include?(:save!)
+            alias_method "#{builder.field_name}_save!".to_sym, :save!
+          end
+        end
+      end
+
       def embedded_save!
         proc do |builder|
           define_method('save!') do
             parent = public_send(builder.field_name)
-            raise NoParentError.new('save', self.class.name) unless parent.present?
+            raise NoParentError.new('save!', self.class.name) unless parent.present?
 
             send("#{builder.field_name}_send_to_related", self)
             parent.save!
+            if respond_to?("#{builder.field_name}_save!")
+              send("#{builder.field_name}_save!")
+            end
           end
         end
       end
