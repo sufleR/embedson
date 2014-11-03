@@ -76,9 +76,7 @@ module Embedson
 
             send("#{builder.field_name}_send_to_related", nil)
             parent.save!
-            if respond_to?("#{builder.field_name}_destroy")
-              send("#{builder.field_name}_destroy")
-            end
+            send("#{builder.field_name}_recursive_call", 'destroy')
           end
         end
       end
@@ -99,9 +97,7 @@ module Embedson
 
             send("#{builder.field_name}_send_to_related", self)
             parent.save
-            if respond_to?("#{builder.field_name}_save")
-              send("#{builder.field_name}_save")
-            end
+            send("#{builder.field_name}_recursive_call", 'save')
           end
         end
       end
@@ -122,9 +118,7 @@ module Embedson
 
             send("#{builder.field_name}_send_to_related", self)
             parent.save!
-            if respond_to?("#{builder.field_name}_save!")
-              send("#{builder.field_name}_save!")
-            end
+            send("#{builder.field_name}_recursive_call", 'save!')
           end
         end
       end
@@ -132,8 +126,9 @@ module Embedson
       def embedded_changed
         proc do |builder|
           define_method('embedson_model_changed!') do
-            parent = public_send(builder.field_name)
-            raise NoParentError.new('register change', self.class.name) unless parent.present?
+            unless public_send(builder.field_name).present?
+              raise NoParentError.new('register change', self.class.name)
+            end
 
             send("#{builder.field_name}_send_to_related", self)
             true
@@ -150,6 +145,16 @@ module Embedson
             return if parent.nil?
             raise NoRelationDefinedError.new(parent.class, builder.inverse_set) unless parent.respond_to?(builder.inverse_set)
             parent.public_send(builder.inverse_set, arg)
+          end
+        end
+      end
+
+      def embedded_recursive_call
+        proc do |builder|
+          define_method("#{builder.field_name}_recursive_call") do |arg|
+            if respond_to?("#{builder.field_name}_#{arg}")
+              send("#{builder.field_name}_#{arg}")
+            end
           end
         end
       end
