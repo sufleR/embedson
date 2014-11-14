@@ -52,9 +52,11 @@ module Embedson
         end
       end
 
-      def embedded_alter_destroy(builder)
-        if klass.instance_methods(false).include?(:destroy)
-          klass.send :alias_method, "#{builder.field_name}_destroy".to_sym, :destroy
+      def embedded_alter_methods(builder)
+        [:destroy, :save, :save!].each do |meth|
+          if klass.instance_methods(false).include?(meth)
+            klass.send :alias_method, "#{builder.field_name}_#{meth}".to_sym, meth
+          end
         end
       end
 
@@ -69,12 +71,6 @@ module Embedson
         end
       end
 
-      def embedded_alter_save(builder)
-        if klass.instance_methods(false).include?(:save)
-          klass.send :alias_method, "#{builder.field_name}_save".to_sym, :save
-        end
-      end
-
       def embedded_save(builder)
         klass.send :define_method, 'save' do
           parent = public_send(builder.field_name)
@@ -83,12 +79,6 @@ module Embedson
           send("#{builder.field_name}_send_to_related", self)
           parent.save
           send("#{builder.field_name}_recursive_call", 'save')
-        end
-      end
-
-      def embedded_alter_save!(builder)
-        if klass.instance_methods(false).include?(:save!)
-          klass.send :alias_method, "#{builder.field_name}_save!".to_sym, :save!
         end
       end
 
