@@ -45,7 +45,7 @@ module Embedson
 
       def generate_common
         methods_for_both.each do |meth|
-          klass.class_exec self, &send(meth)
+          klass.class_exec self, &self.method(meth)
         end
       end
 
@@ -53,16 +53,13 @@ module Embedson
         [:verify_arg_klass]
       end
 
-      def verify_arg_klass
-        proc do |builder|
-          private
-
-          define_method("#{builder.field_name}_verify_arg_klass") do |arg|
-            unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
-              raise ClassTypeError.new(arg.class.name, builder.related_klass_name)
-            end
+      def verify_arg_klass(builder)
+        klass.send(:define_method, "#{field_name}_verify_arg_klass") do |arg|
+          unless arg.nil? || arg.is_a?(builder.related_klass_name.constantize)
+            raise ClassTypeError.new(arg.class.name, builder.related_klass_name)
           end
         end
+        klass.send(:private, "#{field_name}_verify_arg_klass")
       end
     end
   end
