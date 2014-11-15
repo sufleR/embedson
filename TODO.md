@@ -1,4 +1,6 @@
-# ToDo list
+## ToDo list
 
 - make it work with multiple embedded_in
-- make it work with inheritance
+- support for inheritance of embedded class
+- support for dirty tracking
+- never enough tests
