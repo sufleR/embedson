@@ -53,52 +53,29 @@ module Embedson
 
       def embedded_destroy(builder)
         klass.send :define_method, 'destroy' do
-          parents = self.class.embedson_relations.map{ |r| public_send(r) }
-          return false unless parents.any?
-
-          parents.each_with_index do |parent, i|
-            next if parent.nil?
-            send("#{self.class.embedson_relations[i]}_send_to_related", nil)
-            parent.save!
-          end
+          call_in_transaction_for_all_embedding('save!', nil)
         end
       end
 
       def embedded_save(builder)
         klass.send :define_method, 'save' do
-          parents = self.class.embedson_relations.map{ |r| public_send(r) }
-          return false unless parents.any?
-
-          parents.each_with_index do |parent, i|
-            next if parent.nil?
-            send("#{self.class.embedson_relations[i]}_send_to_related", self)
-            parent.save
-          end
+          call_in_transaction_for_all_embedding('save', self)
         end
       end
 
       def embedded_save!(builder)
         klass.send :define_method, 'save!' do
-          parents = self.class.embedson_relations.map{ |r| public_send(r) }
-          raise NoParentError.new('save!', self.class.name) unless parents.any?
-
-          parents.each_with_index do |parent, i|
-            next if parent.nil?
-            send("#{self.class.embedson_relations[i]}_send_to_related", self)
-            parent.save!
-          end
+          raise NoParentError.new('save!', self.class.name) unless any_embedding_present?
+          call_in_transaction_for_all_embedding('save!', self)
         end
       end
 
       def embedded_changed(builder)
         klass.send :define_method, 'embedson_model_changed!' do
-          parents = self.class.embedson_relations.map{ |r| public_send(r) }
-          unless parents.any?
-            raise NoParentError.new('register change', self.class.name)
-          end
+          raise NoParentError.new('register change', self.class.name) unless any_embedding_present?
 
-          parents.each_with_index do |parent, i|
-            send("#{self.class.embedson_relations[i]}_send_to_related", self)
+          self.class.embedson_relations.each do |relation|
+            send("#{relation}_send_to_related", self) if public_send(relation).present?
           end
           true
         end
@@ -108,10 +85,38 @@ module Embedson
         klass.send :define_method, "#{builder.field_name}_send_to_related" do |arg|
           parent = public_send(builder.field_name)
           return if parent.nil?
-          raise NoRelationDefinedError.new(parent.class, builder.inverse_set) unless parent.respond_to?(builder.inverse_set)
+          unless parent.respond_to?(builder.inverse_set)
+            raise NoRelationDefinedError.new(parent.class, builder.inverse_set)
+          end
           parent.public_send(builder.inverse_set, arg)
         end
         klass.send :private, "#{builder.field_name}_send_to_related"
+      end
+
+      def embedded_call_in_transaction_for_all_embedding(builder)
+        return if klass.methods.include? :call_in_transaction_for_all_embedding
+        klass.send :define_method, :call_in_transaction_for_all_embedding do |method, object|
+          results = []
+          ActiveRecord::Base.transaction do
+            self.class.embedson_relations.each do |field_name|
+              next if public_send(field_name).nil?
+              send("#{field_name}_send_to_related", object)
+              save_res = public_send(field_name).send(method)
+              results << save_res
+              raise ActiveRecord::Rollback unless save_res
+            end
+          end
+          !results.size.zero? && results.all?
+        end
+      end
+
+      def embedded_any_present?(builder)
+        return if klass.methods.include? :any_ebedding_present?
+        klass.send :define_method, :any_embedding_present? do
+          self.class.embedson_relations.any?{ |r| public_send(r).present? }
+        end
+
+        klass.send :private, :any_embedding_present?
       end
     end
   end
