@@ -60,7 +60,6 @@ module Embedson
             next if parent.nil?
             send("#{self.class.embedson_relations[i]}_send_to_related", nil)
             parent.save!
-            send("#{self.class.embedson_relations[i]}_recursive_call", 'destroy')
           end
         end
       end
@@ -74,7 +73,6 @@ module Embedson
             next if parent.nil?
             send("#{self.class.embedson_relations[i]}_send_to_related", self)
             parent.save
-            send("#{self.class.embedson_relations[i]}_recursive_call", 'save')
           end
         end
       end
@@ -88,7 +86,6 @@ module Embedson
             next if parent.nil?
             send("#{self.class.embedson_relations[i]}_send_to_related", self)
             parent.save!
-            send("#{self.class.embedson_relations[i]}_recursive_call", 'save!')
           end
         end
       end
@@ -115,15 +112,6 @@ module Embedson
           parent.public_send(builder.inverse_set, arg)
         end
         klass.send :private, "#{builder.field_name}_send_to_related"
-      end
-
-      def embedded_recursive_call(builder)
-        klass.send :define_method, "#{builder.field_name}_recursive_call" do |arg|
-          if respond_to?("#{builder.field_name}_#{arg}")
-            send("#{builder.field_name}_#{arg}")
-          end
-        end
-        klass.send :private, "#{builder.field_name}_recursive_call"
       end
     end
   end
