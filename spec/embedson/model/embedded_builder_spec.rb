@@ -4,13 +4,15 @@ describe Embedson::Model::EmbeddedBuilder do
 
   with_model :Parent do
     table do |t|
-      t.json :embedded
+      t.json :son_col
       t.json :emb_col
+      t.json :son_two_col
     end
 
     model do
-      embeds_one :son, column_name: :embedded
+      embeds_one :son, column_name: :son_col
       embeds_one :emb, class_name: Son, inverse_of: :parenta, column_name: :emb_col
+      embeds_one :son_two, class_name: Son, inverse_of: :parent_two, column_name: :son_two_col
     end
   end
 
@@ -31,10 +33,11 @@ describe Embedson::Model::EmbeddedBuilder do
 
     embedded_in :parent
     embedded_in :parenta, class_name: 'Parent', inverse_of: :emb
+    embedded_in :parent_two, class_name: 'Parent', inverse_of: :son_two
   end
 
   let(:different) { { 'different' => 'true' } }
-  let(:parent) { Parent.new(embedded: different, emb_col: different) }
+  let(:parent) { Parent.new(son_col: different, emb_col: different) }
   let(:son) { Son.new(something: { 'to' => 'write' }, parent: parent, parenta: parent) }
 
   describe 'defined .parent_send_to_related' do
@@ -42,13 +45,13 @@ describe Embedson::Model::EmbeddedBuilder do
       context 'and to_h is different than parents son.to_h' do
         before do
           son
-          parent.send(:write_attribute, :embedded, different)
+          parent.send(:write_attribute, :son_col, different)
         end
 
-        it 'changes parents embedded to son.to_h' do
+        it 'changes parents son_col to son.to_h' do
           expect{
             son.send(:parent_send_to_related, son)
-          }.to change { parent.embedded }.from('different' => 'true').to(son.to_h.stringify_keys)
+          }.to change { parent.son_col }.from('different' => 'true').to(son.to_h.stringify_keys)
         end
 
       end
@@ -56,7 +59,7 @@ describe Embedson::Model::EmbeddedBuilder do
       context 'and to_h is equal parents embeded.to_h' do
         before do
           son
-          parent.send(:write_attribute, :embedded, { something: { to: 'write' } } )
+          parent.send(:write_attribute, :son_col, { something: { to: 'write' } } )
           parent.save!
         end
 
@@ -101,7 +104,7 @@ describe Embedson::Model::EmbeddedBuilder do
       context 'and to_h is equal parents emb_col' do
         before do
           son
-          parent.send(:write_attribute, :embedded, { something: { to: 'write' } } )
+          parent.send(:write_attribute, :son_col, { something: { to: 'write' } } )
           parent.save!
         end
 
@@ -130,7 +133,7 @@ describe Embedson::Model::EmbeddedBuilder do
   describe 'defined .save' do
     let(:parent) { Parent.new() }
 
-    context 'when there is parent' do
+    context 'when there are parents' do
       let(:son) { Son.new(parent: parent, parenta: parent) }
 
       context 'and parent is new record' do
@@ -159,15 +162,15 @@ describe Embedson::Model::EmbeddedBuilder do
 
         it 'changes column values' do
           son.save
-          expect(parent.embedded).to eq('something' => different)
+          expect(parent.son_col).to eq('something' => different)
           expect(parent.emb_col).to eq('something' => different)
         end
       end
 
-      context 'when there is only one parent from two' do
+      context 'and parent is one from many defined' do
         let(:son) { Son.new(parent: parent) }
 
-        context 'and parent is new record' do
+        context 'and is new record' do
           it 'calls save on parent once' do
             parent
             expect(parent).to receive(:save).once
@@ -183,7 +186,7 @@ describe Embedson::Model::EmbeddedBuilder do
           end
         end
 
-        context 'and parent is persisted' do
+        context 'and is persisted' do
           let(:son) { Son.new(something: different, parent: parent) }
 
           before do
@@ -192,7 +195,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
           it 'changes column values' do
             son.save
-            expect(parent.embedded).to eq('something' => different)
+            expect(parent.son_col).to eq('something' => different)
             expect(parent.emb_col).to be_nil
           end
         end
@@ -231,15 +234,15 @@ describe Embedson::Model::EmbeddedBuilder do
 
         it 'changes column values' do
           son.save!
-          expect(parent.embedded).to eq('something' => different)
+          expect(parent.son_col).to eq('something' => different)
           expect(parent.emb_col).to eq('something' => different)
         end
       end
 
-      context 'when there is only one parent from two' do
+      context 'and parent is one from many defined' do
         let(:son) { Son.new(parent: parent) }
 
-        context 'and parent is new record' do
+        context 'and is new record' do
           it 'calls save! on parent once' do
             parent
             expect(parent).to receive(:save!).once
@@ -255,7 +258,7 @@ describe Embedson::Model::EmbeddedBuilder do
           end
         end
 
-        context 'and parent is persisted' do
+        context 'and is persisted' do
           let(:son) { Son.new(something: different, parent: parent) }
 
           before do
@@ -264,7 +267,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
           it 'changes column values' do
             son.save!
-            expect(parent.embedded).to eq('something' => different)
+            expect(parent.son_col).to eq('something' => different)
             expect(parent.emb_col).to be_nil
           end
         end
@@ -276,7 +279,7 @@ describe Embedson::Model::EmbeddedBuilder do
     context 'when there is parent' do
       let(:son) { Son.new(parent: parent, parenta: parent) }
 
-      context 'and parent is new record' do
+      context 'and is new record' do
         it 'calls save! on parent twice' do
           parent
           expect(parent).to receive(:save!).twice
@@ -293,7 +296,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
       end
 
-      context 'and parent is persisted' do
+      context 'and is persisted' do
         let(:son) { Son.new(something: different, parent: parent, parenta: parent) }
 
         before do
@@ -302,15 +305,15 @@ describe Embedson::Model::EmbeddedBuilder do
 
         it 'changes column values' do
           son.destroy
-          expect(parent.embedded).to be_nil
+          expect(parent.son_col).to be_nil
           expect(parent.emb_col).to be_nil
         end
       end
 
-      context 'when there is only one parent from two' do
+      context 'and parent is one from many defined' do
         let(:son) { Son.new(parent: parent) }
 
-        context 'and parent is new record' do
+        context 'and is new record' do
           it 'calls save! on parent once' do
             parent
             expect(parent).to receive(:save!).once
@@ -326,7 +329,7 @@ describe Embedson::Model::EmbeddedBuilder do
           end
         end
 
-        context 'and parent is persisted' do
+        context 'and is persisted' do
           let(:son) { Son.new(something: different, parent: parent) }
 
           before do
@@ -335,7 +338,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
           it 'changes column values' do
             son.destroy
-            expect(parent.embedded).to be_nil
+            expect(parent.son_col).to be_nil
             expect(parent.emb_col).to eq different
           end
         end
