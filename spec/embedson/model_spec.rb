@@ -342,45 +342,6 @@ describe Embedson::Model do
         end
       end
 
-      describe 'defined .save method' do
-
-        context 'when there is parent' do
-          let(:embedded) { Embeddede.new(parent: parent) }
-
-          it 'calls .save on parent' do
-            expect(parent).to receive(:save)
-            embedded.save
-          end
-
-          it 'saves to_h result in parent column' do
-            parent.save!
-            expect {
-              embedded.save
-            }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to({ "defined" => "in", "embedded" => true })
-          end
-
-          context 'and embedded is changed' do
-            it 'saves changes in parent' do
-              embedded.save!
-              expect {
-                embedded.change = 'new value'
-                embedded.save
-              }.to change { parent.reload.read_attribute(:embedded) }
-                    .from({ "defined" => "in", "embedded" => true })
-                    .to({"defined"=>"in", "embedded"=>true, "change"=>"new value"})
-            end
-          end
-        end
-
-        context 'when there is no parent' do
-          let(:embedded) { Embeddede.new }
-
-          it 'returns false' do
-            expect(embedded.save).to eq(false)
-          end
-        end
-      end
-
       describe 'defined .save! method' do
 
         context 'when there is parent' do
