@@ -128,6 +128,8 @@ describe Embedson::Model::EmbeddedBuilder do
   end
 
   describe 'defined .save' do
+    let(:parent) { Parent.new() }
+
     context 'when there is parent' do
       let(:son) { Son.new(parent: parent, parenta: parent) }
 
@@ -161,10 +163,46 @@ describe Embedson::Model::EmbeddedBuilder do
           expect(parent.emb_col).to eq('something' => different)
         end
       end
+
+      context 'when there is only one parent from two' do
+        let(:son) { Son.new(parent: parent) }
+
+        context 'and parent is new record' do
+          it 'calls save on parent once' do
+            parent
+            expect(parent).to receive(:save).once
+            son.save
+          end
+
+          it 'saves son to parent' do
+            parent
+            son.save
+            parent.reload
+            expect(parent.son).to eq son
+            expect(parent.emb).to be_nil
+          end
+        end
+
+        context 'and parent is persisted' do
+          let(:son) { Son.new(something: different, parent: parent) }
+
+          before do
+            parent.save!
+          end
+
+          it 'changes column values' do
+            son.save
+            expect(parent.embedded).to eq('something' => different)
+            expect(parent.emb_col).to be_nil
+          end
+        end
+      end
     end
   end
 
   describe 'defined .save!' do
+    let(:parent) { Parent.new() }
+
     context 'when there is parent' do
       let(:son) { Son.new(parent: parent, parenta: parent) }
 
@@ -195,6 +233,40 @@ describe Embedson::Model::EmbeddedBuilder do
           son.save!
           expect(parent.embedded).to eq('something' => different)
           expect(parent.emb_col).to eq('something' => different)
+        end
+      end
+
+      context 'when there is only one parent from two' do
+        let(:son) { Son.new(parent: parent) }
+
+        context 'and parent is new record' do
+          it 'calls save! on parent once' do
+            parent
+            expect(parent).to receive(:save!).once
+            son.save!
+          end
+
+          it 'saves son to parent' do
+            parent
+            son.save!
+            parent.reload
+            expect(parent.son).to eq son
+            expect(parent.emb).to be_nil
+          end
+        end
+
+        context 'and parent is persisted' do
+          let(:son) { Son.new(something: different, parent: parent) }
+
+          before do
+            parent.save!
+          end
+
+          it 'changes column values' do
+            son.save!
+            expect(parent.embedded).to eq('something' => different)
+            expect(parent.emb_col).to be_nil
+          end
         end
       end
     end
@@ -232,6 +304,40 @@ describe Embedson::Model::EmbeddedBuilder do
           son.destroy
           expect(parent.embedded).to be_nil
           expect(parent.emb_col).to be_nil
+        end
+      end
+
+      context 'when there is only one parent from two' do
+        let(:son) { Son.new(parent: parent) }
+
+        context 'and parent is new record' do
+          it 'calls save! on parent once' do
+            parent
+            expect(parent).to receive(:save!).once
+            son.save!
+          end
+
+          it 'saves nil to parent' do
+            parent
+            son.destroy
+            parent.reload
+            expect(parent.son).to be_nil
+            expect(parent.emb_col).to eq different
+          end
+        end
+
+        context 'and parent is persisted' do
+          let(:son) { Son.new(something: different, parent: parent) }
+
+          before do
+            parent.save!
+          end
+
+          it 'changes column values' do
+            son.destroy
+            expect(parent.embedded).to be_nil
+            expect(parent.emb_col).to eq different
+          end
         end
       end
     end

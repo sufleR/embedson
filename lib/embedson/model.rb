@@ -44,7 +44,13 @@ module Embedson
     #
     # Returns nothing
     def embedded_in(name, options = {})
+      @embedson_relations ||= []
+      @embedson_relations << name
       MethodBuilder.new(self, name, options).embedded
+    end
+
+    def self.extended(mod)
+      attr_reader :embedson_relations
     end
   end
 end

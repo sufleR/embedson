@@ -21,7 +21,6 @@ module Embedson
       end
 
       def embedded_alter_initialize(builder)
-
         klass.send :alias_method, "#{builder.field_name}_initialize".to_sym, :initialize
         klass.send :private, "#{builder.field_name}_initialize"
       end
@@ -52,54 +51,58 @@ module Embedson
         end
       end
 
-      def embedded_alter_methods(builder)
-        [:destroy, :save, :save!].each do |meth|
-          if klass.instance_methods(false).include?(meth)
-            klass.send :alias_method, "#{builder.field_name}_#{meth}".to_sym, meth
-          end
-        end
-      end
-
       def embedded_destroy(builder)
         klass.send :define_method, 'destroy' do
-          parent = public_send(builder.field_name)
-          return false unless parent.present?
+          parents = self.class.embedson_relations.map{ |r| public_send(r) }
+          return false unless parents.any?
 
-          send("#{builder.field_name}_send_to_related", nil)
-          parent.save!
-          send("#{builder.field_name}_recursive_call", 'destroy')
+          parents.each_with_index do |parent, i|
+            next if parent.nil?
+            send("#{self.class.embedson_relations[i]}_send_to_related", nil)
+            parent.save!
+            send("#{self.class.embedson_relations[i]}_recursive_call", 'destroy')
+          end
         end
       end
 
       def embedded_save(builder)
         klass.send :define_method, 'save' do
-          parent = public_send(builder.field_name)
-          return false unless parent.present?
+          parents = self.class.embedson_relations.map{ |r| public_send(r) }
+          return false unless parents.any?
 
-          send("#{builder.field_name}_send_to_related", self)
-          parent.save
-          send("#{builder.field_name}_recursive_call", 'save')
+          parents.each_with_index do |parent, i|
+            next if parent.nil?
+            send("#{self.class.embedson_relations[i]}_send_to_related", self)
+            parent.save
+            send("#{self.class.embedson_relations[i]}_recursive_call", 'save')
+          end
         end
       end
 
       def embedded_save!(builder)
         klass.send :define_method, 'save!' do
-          parent = public_send(builder.field_name)
-          raise NoParentError.new('save!', self.class.name) unless parent.present?
+          parents = self.class.embedson_relations.map{ |r| public_send(r) }
+          raise NoParentError.new('save!', self.class.name) unless parents.any?
 
-          send("#{builder.field_name}_send_to_related", self)
-          parent.save!
-          send("#{builder.field_name}_recursive_call", 'save!')
+          parents.each_with_index do |parent, i|
+            next if parent.nil?
+            send("#{self.class.embedson_relations[i]}_send_to_related", self)
+            parent.save!
+            send("#{self.class.embedson_relations[i]}_recursive_call", 'save!')
+          end
         end
       end
 
       def embedded_changed(builder)
         klass.send :define_method, 'embedson_model_changed!' do
-          unless public_send(builder.field_name).present?
+          parents = self.class.embedson_relations.map{ |r| public_send(r) }
+          unless parents.any?
             raise NoParentError.new('register change', self.class.name)
           end
 
-          send("#{builder.field_name}_send_to_related", self)
+          parents.each_with_index do |parent, i|
+            send("#{self.class.embedson_relations[i]}_send_to_related", self)
+          end
           true
         end
       end
