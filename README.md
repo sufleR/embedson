@@ -32,6 +32,9 @@ Or install it yourself as:
 
 ## Usage
 
+Example with [Searchlight](https://github.com/nathanl/searchlight) described
+in blogpost ["Persistent queries in Ruby on Rails with PostgreSQL"](https://netguru.co/blog/persistent-queries-in-ruby-on-rails).
+
 Example with [Virtus](https://github.com/solnic/virtus):
 
 ```RUBY
