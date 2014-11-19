@@ -21,6 +21,10 @@ module Embedson
         generate_common
       end
 
+      def hash_method
+        @hash_method || options.fetch(:hash_method, nil) || :to_h
+      end
+
       def column_name
         @column_name ||= options.fetch(:column_name, nil) || field_name
       end
