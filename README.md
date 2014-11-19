@@ -50,10 +50,10 @@ Example with [Virtus](https://github.com/solnic/virtus):
 	
 	class Test < ActiveRecord::Base
 
-	  embeds_one :virt, class_name: Virt,
-			    column_name: :data,
-			    inverse_of: :parent,
-			    hash_method: :to_h    # default option
+	  embeds_one :virt, 	class_name: Virt,
+				column_name: :data,
+				inverse_of: :parent,
+				hash_method: :to_h    # default option
 	end
 
 	class Virt
