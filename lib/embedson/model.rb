@@ -16,6 +16,7 @@ module Embedson
     #           :class_name - Name of class which will be ebedded.
     #           :column_name - Name of column where Hash representation will be stored.
     #           :inverse_of - Name of field where related class will store current object.
+    #           :hash_method - Method name which returns hash representation os saved object. Default :to_h
     #
     # Examples
     #
