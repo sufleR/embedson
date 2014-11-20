@@ -1,27 +1,21 @@
 # Change log
 
-## Unreleased
+## 1.0.5 / Unreleased
 
-### Added
+* [Added]
 
-### Deprecated
+* [Deprecated]
 
-### Removed
+* [Removed]
 
-### Fixed
+* [Fixed]
 
-## v1.0.4 - 2014-11-19
+## 1.0.4 / 2014-11-19
 
-### Added
+* [Added] support for :hash_method option.
 
-- support for :hash_method option.
+## 1.0.3 / 2014-11-16
 
-## v1.0.3
+* [Added] support for multiple embedded_in
 
-### Added - 2014-11-16
-
-- support for multiple embedded_in
-
-### Fixed
-
-- sending embedded class to embedding object when saving
+* [Fixed] sending embedded class to embedding object when saving
