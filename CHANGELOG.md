@@ -1,4 +1,4 @@
-# Change log
+# Embedson change log
 
 ## 1.0.5 / Unreleased
 
