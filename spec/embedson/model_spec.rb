@@ -86,7 +86,7 @@ describe Embedson::Model do
               expect{
                 parent.embedded = embedded
                 parent.save!
-              }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to(embedded.to_h.stringify_keys)
+              }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to(embedded.to_h.stringify_keys.merge('_type' => 'Parent'))
             end
           end
         end
@@ -155,7 +155,7 @@ describe Embedson::Model do
         expect {
           parent.embeddedb = embedded
           parent.save!
-        }.to change{ parent.read_attribute(:data) }.from(nil).to(embedded.to_h.stringify_keys)
+        }.to change{ parent.read_attribute(:data) }.from(nil).to(embedded.to_h.stringify_keys.merge('_type' => 'Parent'))
       end
     end
 
@@ -336,7 +336,7 @@ describe Embedson::Model do
               expect{
                 embedded.parent = parent
                 parent.save!
-              }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to(embedded.to_h.stringify_keys)
+              }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to(embedded.to_h.stringify_keys.merge('_type' => 'Parent'))
             end
           end
         end
@@ -356,7 +356,7 @@ describe Embedson::Model do
             parent.save!
             expect {
               embedded.save!
-            }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to({ "defined" => "in", "embedded" => true })
+            }.to change { parent.reload.read_attribute(:embedded) }.from(nil).to({ "defined" => "in", "embedded" => true, '_type' => 'Parent' })
           end
 
           context 'and embedded is changed' do
@@ -366,8 +366,8 @@ describe Embedson::Model do
                 embedded.change = 'new value'
                 embedded.save!
               }.to change { parent.reload.read_attribute(:embedded) }
-                    .from({ "defined" => "in", "embedded" => true })
-                    .to({"defined"=>"in", "embedded"=>true, "change"=>"new value"})
+               .from({ "defined" => "in", "embedded" => true, "_type" => "Parent" })
+               .to({"defined"=>"in", "embedded"=>true, "change"=>"new value", "_type" => "Parent"})
             end
           end
         end
@@ -393,7 +393,7 @@ describe Embedson::Model do
             embedded.save!
             expect {
               embedded.destroy
-            }.to change { parent.reload.read_attribute(:embedded) }.from({ "defined" => "in", "embedded" => true }).to(nil)
+            }.to change { parent.reload.read_attribute(:embedded) }.from({ "defined" => "in", "embedded" => true, '_type' => 'Parent' }).to(nil)
           end
         end
 
@@ -419,7 +419,9 @@ describe Embedson::Model do
             embedded.change = 'registered'
             expect {
               embedded.embedson_model_changed!
-            }.to change { parent.read_attribute(:embedded) }.from({ "defined" => "in", "embedded" => true }).to({ "defined" => "in", "embedded" => true, 'change' => 'registered' })
+            }.to change { parent.read_attribute(:embedded) }
+             .from({ "defined" => "in", "embedded" => true, '_type' => 'Parent' })
+             .to({ "defined" => "in", "embedded" => true, 'change' => 'registered', '_type' => 'Parent' })
           end
         end
 

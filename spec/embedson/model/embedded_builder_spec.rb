@@ -64,7 +64,9 @@ describe Embedson::Model::EmbeddedBuilder do
         it 'changes parents son_col to son.to_h' do
           expect{
             son.send(:parent_send_to_related, son)
-          }.to change { parent.son_col }.from('different' => 'true').to(son.to_h.stringify_keys)
+          }.to change { parent.son_col }
+           .from('different' => 'true')
+           .to(son.to_h.stringify_keys.merge('_type' => 'Parent'))
         end
 
       end
@@ -72,7 +74,7 @@ describe Embedson::Model::EmbeddedBuilder do
       context 'and to_h is equal parents embeded.to_h' do
         before do
           son
-          parent.send(:write_attribute, :son_col, { something: { to: 'write' } } )
+          parent.send(:write_attribute, :son_col, { something: { to: 'write' }, _type: 'Parent' } )
           parent.save!
         end
 
@@ -109,7 +111,9 @@ describe Embedson::Model::EmbeddedBuilder do
         it 'changes parents emb_col to son.to_h' do
           expect{
             son.send(:parenta_send_to_related, son)
-          }.to change { parent.emb_col }.from('different' => 'true').to(son.to_h.stringify_keys)
+          }.to change { parent.emb_col }
+           .from('different' => 'true')
+           .to(son.to_h.stringify_keys.merge('_type' => 'Parent'))
         end
 
       end
@@ -210,9 +214,9 @@ describe Embedson::Model::EmbeddedBuilder do
 
         it 'changes column values' do
           son.save
-          expect(parent.son_col).to eq('something' => different)
+          expect(parent.son_col).to eq('something' => different, '_type' => 'Parent')
           expect(parent.emb_col).to be_nil
-          expect(parent_two.son_col).to eq('something' => different)
+          expect(parent_two.son_col).to eq('something' => different, '_type' => 'ParentTwo')
         end
 
         context 'and son is changed' do
@@ -222,9 +226,9 @@ describe Embedson::Model::EmbeddedBuilder do
               son.change = 'new value'
               son.save
             }.to change { parent.reload.son_col }
-                  .from('something' => different)
-                  .to('something' => different, 'change' => 'new value')
-            expect(parent_two.son_col).to eq('something' => different, 'change' => 'new value')
+             .from('something' => different, '_type' => 'Parent')
+             .to('something' => different, 'change' => 'new value', '_type' => 'Parent')
+            expect(parent_two.son_col).to eq('something' => different, 'change' => 'new value', '_type' => 'ParentTwo')
           end
         end
       end
@@ -257,7 +261,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
           it 'changes column values' do
             expect(son.save).to be_truthy
-            expect(parent.son_col).to eq('something' => different)
+            expect(parent.son_col).to eq('something' => different, '_type' => 'Parent')
             expect(parent.emb_col).to be_nil
           end
         end
@@ -331,9 +335,9 @@ describe Embedson::Model::EmbeddedBuilder do
         it 'changes column values' do
           expect(son.save!).to be_truthy
           parent.reload
-          expect(parent.son_col).to eq('something' => different)
+          expect(parent.son_col).to eq('something' => different, '_type' => 'Parent')
           expect(parent.emb_col).to be_nil
-          expect(parent_two.reload.son_col).to eq('something' => different)
+          expect(parent_two.reload.son_col).to eq('something' => different, '_type' => 'ParentTwo')
         end
 
         context 'and son is changed' do
@@ -343,9 +347,9 @@ describe Embedson::Model::EmbeddedBuilder do
               son.change = 'new value'
               son.save!
             }.to change { parent.reload.son_col }
-                  .from('something' => different)
-                  .to('something' => different, 'change' => 'new value')
-            expect(parent_two.son_col).to eq('something' => different, 'change' => 'new value')
+             .from('something' => different, '_type' => 'Parent')
+             .to('something' => different, 'change' => 'new value', '_type' => 'Parent')
+            expect(parent_two.son_col).to eq('something' => different, 'change' => 'new value', '_type' => 'ParentTwo')
           end
         end
       end
@@ -378,7 +382,7 @@ describe Embedson::Model::EmbeddedBuilder do
 
           it 'changes column values' do
             expect(son.save!).to be_truthy
-            expect(parent.son_col).to eq('something' => different)
+            expect(parent.son_col).to eq('something' => different, '_type' => 'Parent')
             expect(parent.emb_col).to be_nil
           end
         end
