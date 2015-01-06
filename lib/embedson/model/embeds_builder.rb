@@ -26,7 +26,7 @@ module Embedson
           send("#{builder.field_name}_send_to_related", arg)
 
           instance_variable_set(builder.instance_var_name, arg)
-          val = arg.nil? ? arg : arg.send(builder.hash_method).stringify_keys
+          val = arg.nil? ? arg : arg.send(builder.hash_method).stringify_keys.merge('_type' => builder.klass.name)
           unless val == read_attribute(builder.column_name)
             write_attribute(builder.column_name, val)
           end
@@ -44,7 +44,8 @@ module Embedson
 
       def related_model(builder)
         klass.send :define_method, "#{builder.field_name}_related_model" do
-          builder.related_klass_name.constantize.new(read_attribute(builder.column_name))
+          attribute = read_attribute(builder.column_name)
+          attribute.fetch('_type', builder.related_klass_name).constantize.new(attribute)
         end
         klass.send :private, "#{builder.field_name}_related_model"
       end
