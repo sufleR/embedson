@@ -6,14 +6,14 @@
 
 # Embedson
 
+Main goal is to implement Mongoids embedded document functionality in ActiveRecord.
+
+Hash representation of class defined by specified method (default `to_h`) is saved in json/hstore column.
+
 Adds functionality of `embeds_one` to ActiveRecord.
 
-Adds functionality of `embedded_in` to any class:
+Adds functionality of `embedded_in` to any class initialized with Hash.
 
-- with defined `to_h` method which should return `Hash` 
-- initialized with Hash.
-
-Result of `to_h` is saved json/hstore column.
 
 
 ## Installation
