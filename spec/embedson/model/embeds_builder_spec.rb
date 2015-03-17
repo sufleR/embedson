@@ -17,6 +17,17 @@ describe Embedson::Model::EmbedsBuilder do
 
     embedded_in :parent, inverse_of: :son
 
+    def initialize(hash = nil)
+      @table = {}
+      return unless hash
+      hash.each do |k,v|
+        @table[k.to_sym] = v
+      end
+    end
+
+    def to_h
+      @table
+    end
   end
 
   class FirstSonsChild < FirstSon
