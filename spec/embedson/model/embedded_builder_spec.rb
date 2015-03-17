@@ -391,12 +391,22 @@ describe Embedson::Model::EmbeddedBuilder do
   end
 
   describe 'defined .destroy' do
+
+
+    context 'when there is no parent' do
+      let(:son) { Son.new }
+
+      it 'returns false' do
+        expect(son.destroy).to be_falsey
+      end
+    end
+
     context 'when there is parent' do
       let(:son) { Son.new(parent: parent, parent_two: parent_two) }
 
       context 'and destroy on all returns true' do
         it 'returns true' do
-          expect(son.destroy).to eq(true)
+          expect(son.destroy).to be_truthy
         end
       end
 
