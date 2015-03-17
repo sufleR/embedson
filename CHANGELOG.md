@@ -1,6 +1,6 @@
 # Embedson change log
 
-## 1.0.5 / Unreleased
+## 1.1.1 / Unreleased
 
 * [Added]
 
@@ -9,6 +9,12 @@
 * [Removed]
 
 * [Fixed]
+
+## 1.1.0 / 2015-03-17
+
+* [Added] support for inheritance in embedded classes
+
+* [Fixed] fix assignment to instance variable in hash_method
 
 ## 1.0.4 / 2014-11-19
 
