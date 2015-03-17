@@ -12,7 +12,7 @@ describe Embedson::Model::EmbedsBuilder do
     end
   end
 
-  class FirstSon < OpenStruct
+  class FirstSon
     extend Embedson::Model
 
     embedded_in :parent, inverse_of: :son
