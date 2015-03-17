@@ -43,7 +43,7 @@ describe Embedson::Model::EmbedsBuilder do
         expect(parent.son).to eq son
       end
 
-      context 'when aprent is persisted' do
+      context 'when parent is persisted' do
         before do
           parent.save!
         end
