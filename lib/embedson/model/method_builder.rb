@@ -22,7 +22,7 @@ module Embedson
       end
 
       def hash_method
-        @hash_method || options.fetch(:hash_method, nil) || :to_h
+        @hash_method ||= options.fetch(:hash_method, nil) || :to_h
       end
 
       def column_name
