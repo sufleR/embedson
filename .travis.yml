@@ -1,16 +1,26 @@
 language: ruby
+
+gemfile:
+  - gemfiles/3.2.gemfile
+  - gemfiles/4.0.gemfile
+  - gemfiles/4.1.gemfile
+  - gemfiles/4.2.gemfile
+  - gemfiles/5.0.gemfile
+
 rvm:
   - '1.9.3'
   - '2.0.0'
-  - '2.1.5'
-  - '2.2.1'
+  - '2.1.10'
+  - '2.2.5'
+  - '2.3.1'
 
 addons:
-  postgresql: '9.3'
+  postgresql: '9.6'
   code_climate:
     repo_token: deb94fa27f5036a974d5e0987aa797f570a4952b34cf4797aff1e3164e20f19f
 
 env:
   - BUILDER=travis
+
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
