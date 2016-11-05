@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "embedson"
   spec.version       = Embedson::VERSION
   spec.authors       = ["sufleR"]
-  spec.email         = ["szymon.fracczak@netguru.co"]
+  spec.email         = ["szymon.fracczak@gmail.com"]
   spec.summary       = %q{Embedded model for AR with postgresql}
   spec.description   = %q{Save hash representation of class in json column as embedded model.}
   spec.homepage      = "https://github.com/sufleR/embedson"
