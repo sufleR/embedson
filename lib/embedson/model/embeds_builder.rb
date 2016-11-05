@@ -26,8 +26,8 @@ module Embedson
           send("#{builder.field_name}_send_to_related", arg)
 
           instance_variable_set(builder.instance_var_name, arg)
-          val = arg.nil? ? arg : arg.send(builder.hash_method).stringify_keys.merge('_type' => builder.klass.name)
-          unless val == read_attribute(builder.column_name)
+          val = arg.nil? ? arg : arg.send(builder.hash_method).deep_stringify_keys.merge('_type' => builder.klass.name)
+          unless val == read_attribute(builder.column_name).try(:deep_stringify_keys)
             write_attribute(builder.column_name, val)
           end
         end
