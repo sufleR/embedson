@@ -1,7 +1,6 @@
 language: ruby
 
 gemfile:
-  - gemfiles/3.2.gemfile
   - gemfiles/4.0.gemfile
   - gemfiles/4.1.gemfile
   - gemfiles/4.2.gemfile
@@ -14,7 +13,22 @@ rvm:
   - '2.2.5'
   - '2.3.1'
 matrix:
+  include:
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.0.pg18.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.1.pg18.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.2.pg18.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.3.pg18.gemfile
   exclude:
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.0.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.1.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/4.2.gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/5.0.gemfile
     - rvm: 2.0.0
