@@ -8,7 +8,7 @@
 
 * [Removed]
 
-* [Fixed]
+* [Fixed] when using activerecord 4.0 comparison of hashes ws failing resulting in new data assignment even if hashes was equal
 
 ## 1.1.0 / 2015-03-17
 
