@@ -13,7 +13,14 @@ rvm:
   - '2.1.10'
   - '2.2.5'
   - '2.3.1'
-
+matrix:
+  exclude:
+    - rvm: 1.9.3
+      gemfile: gemfiles/5.0.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/5.0.gemfile
+    - rvm: 2.1.10
+      gemfile: gemfiles/5.0.gemfile
 addons:
   postgresql: '9.4'
   code_climate:
